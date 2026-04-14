@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import GameBoard from "@/components/GameBoard";
 import { Dice } from "@/components/Dice";
 import GameChat from "@/components/GameChat";
@@ -313,7 +313,13 @@ function PlayPageContent() {
 export default function PlayPage() {
   return (
     <GameProvider playerCount={4}>
-      <PlayPageContent />
+      <Suspense fallback={
+        <div style={{ height: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+          <div className="loader"></div>
+        </div>
+      }>
+        <PlayPageContent />
+      </Suspense>
     </GameProvider>
   );
 }

@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 
 export async function POST(
   request: Request,
-  { params }: { params: { roomId: string } }
+  { params }: { params: Promise<{ roomId: string }> }
 ) {
   try {
     const { roomId } = await params;
@@ -102,8 +102,6 @@ export async function POST(
     }
 
     return NextResponse.json({ message: "Game state processed", updated: updateResult.count > 0 });
-
-    return NextResponse.json({ message: "Game state saved successfully", status: updatedRoom.status });
   } catch (error) {
     console.error("Failed to save game state:", error);
     return NextResponse.json({ error: "Failed to save game state" }, { status: 500 });

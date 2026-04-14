@@ -1,0 +1,49 @@
+services:
+  db:
+    image: postgres:15-alpine
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d shish_bish"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    env_file:
+      - .env.docker
+    ports:
+      - "5432:5432"
+
+  socket-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.socket
+    restart: always
+    ports:
+      - "3005:3005"
+    env_file:
+      - .env.docker
+    environment:
+      - NODE_ENV=production
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.docker
+    depends_on:
+      db:
+        condition: service_healthy
+      socket-server:
+        condition: service_started
+    # Command to run migrations and then start the app
+    # Note: Using sh -c because standalone mode needs local prisma client
+    command: >
+      sh -c "npx prisma db push && node server.js"
+
+volumes:
+  postgres_data:

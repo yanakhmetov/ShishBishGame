@@ -88,10 +88,9 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ position, connectedPlayer, colo
           />
         ) : (
           <div style={{
-            width: "48px",
-            height: "48px",
+            width: "100%",
+            height: "100%",
             borderRadius: "50%",
-            border: `2px solid ${isActive ? color : `${color}66`}`,
             background: `linear-gradient(135deg, ${color}44, ${color}22)`,
             display: "flex",
             alignItems: "center",

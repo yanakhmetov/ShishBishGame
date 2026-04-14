@@ -17,7 +17,7 @@ const InGameMenu = () => {
   const { t } = useAppContext();
   const { isPaused, pauseTimeLeft, playerPauses, togglePause, surrender, gameStarted, connectedPlayers } = useGame();
   const { data: session } = useSession();
-  
+
   const me = connectedPlayers.find(p => p.userId === (session?.user as any)?.id);
   const myPosition = me?.position || "top";
 
@@ -38,8 +38,8 @@ const InGameMenu = () => {
         router.push("/dashboard");
       }
     } catch (error) {
-       console.error("Error leaving room:", error);
-       router.push("/dashboard"); // Exit anyway if server fails
+      console.error("Error leaving room:", error);
+      router.push("/dashboard"); // Exit anyway if server fails
     } finally {
       setIsLeaving(false);
     }
@@ -49,7 +49,7 @@ const InGameMenu = () => {
     <div style={{ position: "fixed", top: "20px", right: "140px", zIndex: 2000 }}>
 
 
-      <button 
+      <button
         onClick={() => setIsOpen(!isOpen)}
         className="toggle-btn"
         style={{ border: isOpen ? "1px solid white" : "1px solid var(--accent)" }}
@@ -58,14 +58,14 @@ const InGameMenu = () => {
       </button>
 
       {isOpen && (
-        <div className="glass" style={{ 
-          position: "absolute", 
-          top: "60px", 
-          right: "0", 
-          width: "220px", 
-          padding: "1rem", 
-          display: "flex", 
-          flexDirection: "column", 
+        <div className="glass" style={{
+          position: "absolute",
+          top: "60px",
+          right: "0",
+          width: "220px",
+          padding: "1rem",
+          display: "flex",
+          flexDirection: "column",
           gap: "0.75rem",
           animation: "cardFadeIn 0.3s ease forwards"
         }}>
@@ -73,13 +73,13 @@ const InGameMenu = () => {
             <span style={{ fontSize: "10px", opacity: 0.5, textTransform: "uppercase" }}>{t("gameMenu")}</span>
           </div>
 
-          <button 
-            className="btn-secondary" 
+          <button
+            className="btn-secondary"
             onClick={() => { togglePause(myPosition); setIsOpen(false); }}
             disabled={!gameStarted || (playerPauses[myPosition] <= 0 && !isPaused)}
-            style={{ 
-              justifyContent: "flex-start", 
-              gap: "12px", 
+            style={{
+              justifyContent: "flex-start",
+              gap: "12px",
               padding: "0.85rem 1.2rem",
               background: isPaused ? "rgba(74, 222, 128, 0.1)" : "rgba(255,255,255,0.02)",
               borderColor: isPaused ? "#4ade80" : "rgba(255,255,255,0.1)",
@@ -108,9 +108,9 @@ const InGameMenu = () => {
             )}
           </button>
 
-          <button 
-            className="btn-secondary" 
-            onClick={() => { if(confirm(t("surrenderConfirm"))) surrender(myPosition); setIsOpen(false); }}
+          <button
+            className="btn-secondary"
+            onClick={() => { if (confirm(t("surrenderConfirm"))) surrender(myPosition); setIsOpen(false); }}
             disabled={!gameStarted}
             style={{ justifyContent: "flex-start", gap: "10px", padding: "0.75rem 1rem", color: "#f87171" }}
           >
@@ -118,8 +118,8 @@ const InGameMenu = () => {
             <span style={{ fontSize: "12px" }}>{t("surrender")}</span>
           </button>
 
-          <button 
-            className="btn-secondary" 
+          <button
+            className="btn-secondary"
             onClick={handleLeave}
             disabled={isLeaving}
             style={{ justifyContent: "flex-start", gap: "10px", padding: "0.75rem 1rem", width: "100%", opacity: isLeaving ? 0.7 : 1 }}

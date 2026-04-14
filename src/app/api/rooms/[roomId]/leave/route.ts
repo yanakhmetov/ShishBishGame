@@ -10,7 +10,7 @@ export async function POST(
   try {
     const { roomId } = await params;
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -55,12 +55,12 @@ export async function POST(
       } catch (err) {
         console.error("Failed to penalize leaver:", err);
       }
-      
+
       // Remove from activePlayers and mark as kicked for final state sync
       gameState.activePlayers = gameState.activePlayers.filter((p: string) => p !== pos);
       if (!gameState.kickedPlayers) gameState.kickedPlayers = [];
       if (!gameState.kickedPlayers.includes(pos)) gameState.kickedPlayers.push(pos);
-      
+
       // CRITICAL FIX: Clear the player data from the persistent players map
       if (pos && gameState.players && gameState.players[pos]) {
         gameState.players[pos] = {
@@ -121,15 +121,15 @@ export async function POST(
     });
 
     if (room?.hostId === user.id) {
-       const nextPlayer = await prisma.roomPlayer.findFirst({
-         where: { roomId: roomId }
-       });
-       if (nextPlayer) {
-         await prisma.room.update({
-           where: { id: roomId },
-           data: { hostId: nextPlayer.userId }
-         });
-       }
+      const nextPlayer = await prisma.roomPlayer.findFirst({
+        where: { roomId: roomId }
+      });
+      if (nextPlayer) {
+        await prisma.room.update({
+          where: { id: roomId },
+          data: { hostId: nextPlayer.userId }
+        });
+      }
     }
 
     return NextResponse.json({ message: "Player left successfully" });

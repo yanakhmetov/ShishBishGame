@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { X, Trophy, Swords, Medal, Target, User as UserIcon } from "lucide-react";
+import { createPortal } from "react-dom";
 import { ConnectedPlayer } from "@/context/GameContext";
 import { useAppContext } from "@/context/AppContext";
 
@@ -13,8 +14,10 @@ const PlayerProfileModal: React.FC<PlayerProfileModalProps> = ({ player, onClose
   const [isZoomed, setIsZoomed] = useState(false);
   const [scale, setScale] = useState(1);
   const [globalScale, setGlobalScale] = useState(1);
+  const [mounted, setMounted] = useState(false);
 
   React.useEffect(() => {
+    setMounted(true);
     // Scaling logic matching dashboard/create modal
     const handleResize = () => {
       const targetWidth = 1600; 
@@ -28,7 +31,10 @@ const PlayerProfileModal: React.FC<PlayerProfileModalProps> = ({ player, onClose
     };
     handleResize();
     window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    return () => {
+      setMounted(false);
+      window.removeEventListener("resize", handleResize);
+    }
   }, []);
   
   const stats = [
@@ -42,7 +48,9 @@ const PlayerProfileModal: React.FC<PlayerProfileModalProps> = ({ player, onClose
     ? Math.round((player.wins / player.gamesPlayed) * 100) 
     : 0;
 
-  return (
+  if (!mounted) return null;
+
+  const modalContent = (
     <>
       <div style={{
         position: "fixed",
@@ -68,17 +76,22 @@ const PlayerProfileModal: React.FC<PlayerProfileModalProps> = ({ player, onClose
           pointerEvents: "none",
           flexShrink: 0
         }}>
-          <div className="glass" style={{
-            width: "100%",
-            maxWidth: "450px",
-            padding: "3rem",
-            position: "relative",
-            borderRadius: "32px",
-            animation: "modalPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards",
-            border: "1px solid rgba(255,255,255,0.1)",
-            pointerEvents: "auto",
-            margin: "20px"
-          }}>
+          <div 
+            className="glass no-scrollbar" 
+            style={{
+              width: "100%",
+              maxWidth: "450px",
+              height: "calc(100% - 20px)",
+              padding: "3rem",
+              position: "relative",
+              borderRadius: "32px",
+              animation: "modalPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards",
+              border: "1px solid rgba(255,255,255,0.1)",
+              pointerEvents: "auto",
+              margin: "10px",
+              overflowY: "auto"
+            }}
+          >
           {/* Close Button */}
           <button 
             onClick={onClose}
@@ -260,6 +273,8 @@ const PlayerProfileModal: React.FC<PlayerProfileModalProps> = ({ player, onClose
       )}
     </>
   );
+
+  return createPortal(modalContent, document.body);
 };
 
 export default PlayerProfileModal;

@@ -159,6 +159,12 @@ export const translations = {
     posLeft: "LEFT",
     posRight: "RIGHT",
     waitingLabel: "Waiting...",
+    enterFullscreen: "Enter Fullscreen",
+    exitFullscreen: "Exit Fullscreen",
+    switchToRussian: "Switch to Russian",
+    switchToEnglish: "Switch to English",
+    switchToLight: "Switch to Light Mode",
+    switchToDark: "Switch to Dark Mode",
     
     // In-game log messages
     timedOut: "timed out!",
@@ -339,6 +345,12 @@ export const translations = {
     posLeft: "ЛЕВО",
     posRight: "ПРАВО",
     waitingLabel: "Ожидание...",
+    enterFullscreen: "Развернуть на весь экран",
+    exitFullscreen: "Выйти из полноэкранного режима",
+    switchToRussian: "Переключить на русский",
+    switchToEnglish: "Переключить на английский",
+    switchToLight: "Переключить на светлую тему",
+    switchToDark: "Переключить на темную тему",
     
     // Сообщения лога игры
     timedOut: "время вышло!",

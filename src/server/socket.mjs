@@ -29,7 +29,7 @@ io.on("connection", (socket) => {
   });
 });
 
-const PORT = 3005;
-httpServer.listen(PORT, () => {
-  console.log(`🚀 Socket.io server running at http://localhost:${PORT}`);
+const PORT = process.env.PORT || 3005;
+httpServer.listen(PORT, "0.0.0.0", () => {
+  console.log(`🚀 Socket.io server running on port ${PORT}`);
 });

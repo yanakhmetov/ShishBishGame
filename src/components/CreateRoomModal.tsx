@@ -233,6 +233,7 @@ const CreateRoomModal: React.FC<CreateRoomModalProps> = ({ userRating, onClose, 
                 <input 
                   type="password" 
                   placeholder={t("enterPasswordPlaceholder")}
+                  autoComplete="new-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="glass"

@@ -310,6 +310,7 @@ const GameRooms = ({ user }: { user: any }) => {
                   <input 
                     type="password" 
                     autoFocus
+                    autoComplete="new-password"
                     placeholder={t("password")}
                     value={enteredPassword}
                     onChange={(e) => setEnteredPassword(e.target.value)}

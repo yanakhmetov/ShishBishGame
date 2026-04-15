@@ -16,10 +16,29 @@ const CreateRoomModal: React.FC<CreateRoomModalProps> = ({ userRating, onClose, 
   const [minRating, setMinRating] = useState(0);
   const [isPrivate, setIsPrivate] = useState(false);
   const [password, setPassword] = useState("");
+  const [globalScale, setGlobalScale] = useState(1);
   
   useEffect(() => {
     setMounted(true);
-    return () => setMounted(false);
+    
+    // Scaling logic
+    const handleResize = () => {
+      const targetWidth = 1600; 
+      const targetHeight = 950;
+      const vw = window.innerWidth - 40;
+      const vh = window.innerHeight - 40;
+      const widthScale = vw / targetWidth;
+      const heightScale = vh / targetHeight;
+      const scale = Math.min(1, widthScale, heightScale);
+      setGlobalScale(scale);
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    
+    return () => {
+      setMounted(false);
+      window.removeEventListener("resize", handleResize);
+    };
   }, []);
 
   const { t } = useAppContext();
@@ -71,13 +90,19 @@ const CreateRoomModal: React.FC<CreateRoomModalProps> = ({ userRating, onClose, 
       zIndex: 9999,
       padding: "20px"
     }}>
-      <div className="glass" style={{
-        width: "100%",
-        maxWidth: "500px",
-        padding: "2.5rem",
-        position: "relative",
-        animation: "modalPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards"
-      }}>
+      <div 
+        className="glass" 
+        style={{
+          width: "100%",
+          maxWidth: "500px",
+          padding: "2.5rem",
+          position: "relative",
+          animation: "modalPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards",
+          transform: `scale(${globalScale})`,
+          transformOrigin: "center center",
+          transition: "transform 0.3s ease"
+        }}
+      >
         <button 
           onClick={onClose}
           style={{ position: "absolute", top: "20px", right: "20px", background: "none", border: "none", color: "white", cursor: "pointer", opacity: 0.5 }}

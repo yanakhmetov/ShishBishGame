@@ -16,7 +16,6 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ position, connectedPlayer, colo
   const { currentTurn } = useGame();
   const isActive = currentTurn === position;
 
-  // Генерируем инициалы из никнейма
   const initials = connectedPlayer.name
     .split(/(?=[A-Z])/)
     .map(s => s[0])
@@ -48,34 +47,12 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ position, connectedPlayer, colo
           : `0 4px 20px rgba(0,0,0,0.2)`,
         transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
         position: "relative",
-        overflow: "visible", // Allowed for crown overflow
+        overflow: "visible",
         flexShrink: 0,
         animation: isActive ? "active-player-pulse 2s infinite ease-in-out" : "none"
       }}
     >
-      {/* Метка "ВАШ ХОД" */}
-      {isActive && isMe && (
-        <div style={{
-          position: "absolute",
-          top: "-25px",
-          left: "50%",
-          transform: "translateX(-50%)",
-          background: "var(--accent)",
-          color: "black",
-          padding: "2px 10px",
-          borderRadius: "10px",
-          fontSize: "10px",
-          fontWeight: "900",
-          whiteSpace: "nowrap",
-          boxShadow: "0 0 15px var(--glow)",
-          zIndex: 10,
-          animation: "bounce-subtle 1.5s infinite"
-        }}>
-          YOUR TURN
-        </div>
-      )}
-
-      {/* Индикатор активного хода */}
+      {/* Индикатор активного хода (верхняя полоска) */}
       {isActive && (
         <div style={{
           position: "absolute",
@@ -87,7 +64,7 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ position, connectedPlayer, colo
         }} />
       )}
 
-      {/* Аватар (ВВЕРХУ) */}
+      {/* Аватар */}
       <div style={{
         position: "relative",
         flexShrink: 0,
@@ -142,7 +119,7 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ position, connectedPlayer, colo
         )}
       </div>
 
-      {/* Информация (НИЖЕ) */}
+      {/* Информация (Никнейм и рейтинг) */}
       <div style={{
         display: "flex",
         flexDirection: "column",
@@ -151,7 +128,6 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ position, connectedPlayer, colo
         width: "100%",
         padding: "0 8px",
       }}>
-        {/* Никнейм */}
         <div style={{
           fontSize: "12px",
           fontWeight: "900",
@@ -164,10 +140,9 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ position, connectedPlayer, colo
           textShadow: isActive ? `0 0 15px ${color}` : "none",
           transition: "all 0.3s ease"
         }}>
-          {isMe ? "YOU" : connectedPlayer.name}
+          {connectedPlayer.name}
         </div>
 
-        {/* Рейтинг */}
         <div style={{
           display: "flex",
           alignItems: "center",

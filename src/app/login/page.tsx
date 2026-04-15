@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { LogIn, Mail, Lock, Loader2 } from "lucide-react";
 import { useAppContext } from "@/context/AppContext";
+import { ThemeLanguageToggle } from "@/components/ThemeLanguageToggle";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -42,7 +43,9 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="container">
+    <>
+      <ThemeLanguageToggle />
+      <div className="container">
       <div className="glass card">
         <h1 className="glow-text">{t("welcome")}</h1>
         <p style={{ color: "rgba(255,255,255,0.6)", marginBottom: "2rem" }}>
@@ -102,5 +105,6 @@ export default function LoginPage() {
         }
       `}</style>
     </div>
+    </>
   );
 }

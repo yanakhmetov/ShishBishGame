@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Users, Lock, ChevronRight, Globe, Plus, Loader2, Search, RotateCw } from "lucide-react";
+import { Users, Lock, ChevronRight, Globe, Plus, Loader2, Search, RotateCw, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAppContext } from "@/context/AppContext";
@@ -12,6 +12,10 @@ const GameRooms = ({ user }: { user: any }) => {
   const [rooms, setRooms] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [passwordRoom, setPasswordRoom] = useState<any | null>(null);
+  const [enteredPassword, setEnteredPassword] = useState("");
+  const [isJoining, setIsJoining] = useState(false);
+  const [joinError, setJoinError] = useState("");
 
   const fetchRooms = async (search?: string) => {
     try {
@@ -33,9 +37,44 @@ const GameRooms = ({ user }: { user: any }) => {
 
   useEffect(() => {
     fetchRooms(searchQuery);
-    const interval = setInterval(() => fetchRooms(searchQuery), 15000); // 15 seconds for better reactivity
-    return () => clearInterval(interval);
   }, [searchQuery]);
+
+  const handleJoinClick = (room: any) => {
+    if (room.type === "private") {
+      setPasswordRoom(room);
+      setEnteredPassword("");
+      setJoinError("");
+    } else {
+      router.push(`/play?roomId=${room.id}`);
+    }
+  };
+
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!passwordRoom) return;
+    
+    setIsJoining(true);
+    setJoinError("");
+    
+    try {
+      const res = await fetch(`/api/rooms/${passwordRoom.id}/join`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: enteredPassword })
+      });
+      
+      if (res.ok) {
+        router.push(`/play?roomId=${passwordRoom.id}`);
+      } else {
+        const data = await res.json();
+        setJoinError(data.error || t("incorrectPassword"));
+      }
+    } catch (err) {
+      setJoinError(t("errorJoining"));
+    } finally {
+      setIsJoining(false);
+    }
+  };
 
   return (
     <div className="glass" style={{ marginTop: "2rem", padding: "2rem" }}>
@@ -177,19 +216,86 @@ const GameRooms = ({ user }: { user: any }) => {
                     {t("ratingTooLow")}
                   </div>
                 ) : room.type === "private" ? (
-                  <button className="btn-secondary" style={{ width: "100%", fontSize: "12px", gap: "8px" }}>
+                  <button 
+                    onClick={() => handleJoinClick(room)}
+                    className="btn-secondary" 
+                    style={{ width: "100%", fontSize: "12px", gap: "8px" }}
+                  >
                     <Lock size={14} /> {t("enterPassword")}
                   </button>
                 ) : (
-                  <Link href={`/play?roomId=${room.id}`} style={{ textDecoration: "none" }}>
-                    <button className="btn-primary" style={{ width: "100%", fontSize: "12px", height: "36px", margin: 0 }}>
-                      {t("joinArena")} <ChevronRight size={14} />
-                    </button>
-                  </Link>
+                  <button 
+                    onClick={() => handleJoinClick(room)}
+                    className="btn-primary" 
+                    style={{ width: "100%", fontSize: "12px", height: "36px", margin: 0 }}
+                  >
+                    {t("joinArena")} <ChevronRight size={14} />
+                  </button>
                 )}
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Password Modal */}
+      {passwordRoom && (
+        <div style={{
+          position: "fixed",
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: "rgba(0, 0, 0, 0.8)",
+          backdropFilter: "blur(12px)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 10000,
+          padding: "20px"
+        }}>
+          <div className="glass" style={{
+            width: "100%",
+            maxWidth: "400px",
+            padding: "2.5rem",
+            position: "relative",
+            animation: "modalPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards"
+          }}>
+            <button 
+              onClick={() => setPasswordRoom(null)}
+              style={{ position: "absolute", top: "20px", right: "20px", background: "none", border: "none", color: "white", cursor: "pointer", opacity: 0.5 }}
+            >
+              <X size={24} />
+            </button>
+
+            <h2 className="glow-text" style={{ fontSize: "1.5rem", marginBottom: "1rem", textAlign: "center" }}>
+              {t("privateArena")}
+            </h2>
+            <p style={{ textAlign: "center", fontSize: "14px", opacity: 0.6, marginBottom: "2rem" }}>
+              {t("enterPasswordForRoom") || t("enterPasswordFor")} <strong>{passwordRoom.name}</strong>
+            </p>
+
+            <form onSubmit={handlePasswordSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                <input 
+                  type="password" 
+                  autoFocus
+                  placeholder={t("password")}
+                  value={enteredPassword}
+                  onChange={(e) => setEnteredPassword(e.target.value)}
+                  className="glass"
+                  style={{ padding: "0.8rem 1rem", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", color: "white", textAlign: "center", fontSize: "18px", letterSpacing: "4px" }}
+                />
+                {joinError && <div style={{ color: "#f87171", fontSize: "12px", textAlign: "center", marginTop: "4px" }}>{joinError}</div>}
+              </div>
+
+              <button 
+                type="submit" 
+                className="btn-primary" 
+                disabled={isJoining}
+                style={{ height: "48px", fontSize: "16px" }}
+              >
+                {isJoining ? t("joining") : t("confirmJoin")}
+              </button>
+            </form>
+          </div>
         </div>
       )}
     </div>

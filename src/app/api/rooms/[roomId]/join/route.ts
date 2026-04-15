@@ -10,7 +10,7 @@ export async function POST(
   try {
     const { roomId } = await params;
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -38,12 +38,27 @@ export async function POST(
     const { searchParams } = new URL(request.url);
     const action = searchParams.get("action");
 
+    // Get password from body if it exists
+    let bodyPassword = "";
+    try {
+      const body = await request.clone().json();
+      bodyPassword = body.password || "";
+    } catch (e) {
+      // Body might be empty
+    }
+
     const isAlreadyInRoom = room.players.find(p => p.userId === user.id);
-    
+
+    if (room.type === "private" && room.password && action !== "sync" && !isAlreadyInRoom) {
+      if (bodyPassword !== room.password) {
+        return NextResponse.json({ error: "Incorrect password" }, { status: 403 });
+      }
+    }
+
     // Check if player's rating is sufficient (only for new players joining)
     if (!isAlreadyInRoom && action !== "sync" && user.rating < (room.minRating || 0)) {
-      return NextResponse.json({ 
-        error: `Your rating (${user.rating}) is below the required minimum (${room.minRating}) for this arena.` 
+      return NextResponse.json({
+        error: `Your rating (${user.rating}) is below the required minimum (${room.minRating}) for this arena.`
       }, { status: 403 });
     }
 
@@ -85,7 +100,7 @@ export async function POST(
     // Manually fetch each user based on userId
     const flattenedPlayers = await Promise.all(
       rawPlayers.map(async (p) => {
-        const user = await prisma.user.findUnique({ 
+        const user = await prisma.user.findUnique({
           where: { id: p.userId },
           include: {
             achievements: {
@@ -94,7 +109,7 @@ export async function POST(
             }
           }
         });
-        
+
         console.log(`SERVER DEBUG: Direct User Fetch for ${p.userId} -> Name: ${user?.name}`);
 
         return {
@@ -113,9 +128,9 @@ export async function POST(
       })
     );
 
-    return NextResponse.json({ 
-      message: "Joined room successfully", 
-      room: { ...updatedRoom, players: flattenedPlayers } 
+    return NextResponse.json({
+      message: "Joined room successfully",
+      room: { ...updatedRoom, players: flattenedPlayers }
     });
   } catch (error) {
     console.error("Failed to join room:", error);

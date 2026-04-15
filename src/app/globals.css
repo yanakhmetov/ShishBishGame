@@ -650,7 +650,45 @@ h1 {
     /* No constant animation here, only showing active state via classes if needed */
 }
 
+@keyframes vignette-pulse {
+    0%, 100% { box-shadow: inset 0 0 100px rgba(255, 255, 255, 0); }
+    50% { box-shadow: inset 0 0 150px currentColor; opacity: 0.8; }
+}
+
+@keyframes active-player-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
 @keyframes tokenPulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); filter: brightness(1); }
+    50% { transform: translate(-50%, -50%) scale(1.15); filter: brightness(1.2); }
+}
+
+.movable-token {
+    animation: tokenPulse 2s infinite ease-in-out;
+    z-index: 150 !important;
+}
+
+.movable-token:hover {
+    transform: translate(-50%, -50%) scale(1.25) !important;
+    filter: brightness(1.3) !important;
+    box-shadow: 0 0 25px currentColor !important;
+}
+
+@keyframes tokenHomePulse {
     0%, 100% { transform: scale(1); filter: brightness(1); }
-    50% { transform: scale(1.08); filter: brightness(1.3); }
+    50% { transform: scale(1.25); filter: brightness(1.3); }
+}
+
+.movable-home-token {
+    animation: tokenHomePulse 2s infinite ease-in-out;
+    cursor: pointer !important;
+}
+
+.movable-home-token:hover {
+    transform: scale(1.4) !important;
+    filter: brightness(1.4) !important;
+    box-shadow: 0 0 20px currentColor !important;
+    z-index: 10;
 }

@@ -5,6 +5,7 @@ import { User as UserIcon, Camera, ChevronLeft, Save, Loader2, Link as LinkIcon,
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAppContext } from "@/context/AppContext";
+import { ThemeLanguageToggle } from "./ThemeLanguageToggle";
 
 interface ProfileContentProps {
   user: any;
@@ -79,7 +80,9 @@ export const ProfileContent = ({ user }: ProfileContentProps) => {
   };
 
   return (
-    <div style={{ minHeight: "100vh", padding: "2rem", maxWidth: "800px", margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <>
+      <ThemeLanguageToggle />
+      <div style={{ minHeight: "100vh", padding: "2rem", maxWidth: "800px", margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "center" }}>
       <div className="glass" style={{ padding: "3rem", borderRadius: "32px", position: "relative", overflow: "hidden", width: "100%" }}>
         {/* Background Glow */}
         <div style={{ position: "absolute", top: "-100px", right: "-100px", width: "300px", height: "300px", background: "var(--accent)", borderRadius: "50%", filter: "blur(120px)", opacity: 0.1, pointerEvents: "none" }} />
@@ -302,5 +305,6 @@ export const ProfileContent = ({ user }: ProfileContentProps) => {
         </div>
       </div>
     </div>
+    </>
   );
 };

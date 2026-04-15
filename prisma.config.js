@@ -1,4 +1,3 @@
-// Prisma 7 configuration file - Pure JavaScript/No dependencies
 module.exports = {
   schema: "prisma/schema.prisma",
   migrations: {

@@ -15,11 +15,12 @@ const InGameMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isLeaving, setIsLeaving] = useState(false);
   const { t } = useAppContext();
-  const { isPaused, pauseTimeLeft, playerPauses, togglePause, surrender, gameStarted, connectedPlayers } = useGame();
+  const { isPaused, pauseTimeLeft, playerPauses, playerMoves, myPosition, togglePause, surrender, gameStarted } = useGame();
   const { data: session } = useSession();
 
-  const me = connectedPlayers.find(p => p.userId === (session?.user as any)?.id);
-  const myPosition = me?.position || "top";
+  const myMoves = (playerMoves && playerMoves[myPosition]) || 0;
+  const movesNeeded = 40;
+  const canSurrender = gameStarted && myMoves >= movesNeeded;
 
   const handleLeave = async () => {
     if (!roomId) {
@@ -111,11 +112,55 @@ const InGameMenu = () => {
           <button
             className="btn-secondary"
             onClick={() => { if (confirm(t("surrenderConfirm"))) surrender(myPosition); setIsOpen(false); }}
-            disabled={!gameStarted}
-            style={{ justifyContent: "flex-start", gap: "10px", padding: "0.75rem 1rem", color: "#f87171" }}
+            disabled={!canSurrender}
+            style={{ 
+              justifyContent: "flex-start", 
+              gap: "10px", 
+              padding: "0.85rem 1.2rem", 
+              color: canSurrender ? "#f87171" : "rgba(248, 113, 113, 0.4)",
+              background: "rgba(255,255,255,0.02)",
+              borderColor: canSurrender ? "rgba(248, 113, 113, 0.4)" : "rgba(255,255,255,0.05)",
+              opacity: canSurrender ? 1 : 0.7,
+              cursor: canSurrender ? "pointer" : "not-allowed",
+              position: "relative",
+              overflow: "hidden"
+            }}
           >
-            <Flag size={18} />
-            <span style={{ fontSize: "12px" }}>{t("surrender")}</span>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", gap: "10px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <Flag size={18} />
+                <span style={{ fontSize: "14px", fontWeight: "700" }}>{t("surrender")}</span>
+              </div>
+              
+              {!canSurrender && (
+                <div style={{
+                  background: "rgba(248, 113, 113, 0.15)",
+                  padding: "4px 10px",
+                  borderRadius: "8px",
+                  border: "1px solid rgba(248, 113, 113, 0.3)",
+                }}>
+                  <span style={{ 
+                    fontSize: "14px", 
+                    fontWeight: "900", 
+                    color: "#f87171",
+                    letterSpacing: "0.5px"
+                  }}>
+                    {myMoves}/{movesNeeded}
+                  </span>
+                </div>
+              )}
+            </div>
+            {!canSurrender && (
+              <div style={{
+                position: "absolute",
+                bottom: 0,
+                left: 0,
+                height: "3px",
+                background: "linear-gradient(90deg, transparent, #f87171, transparent)",
+                width: `${Math.min(100, (myMoves / movesNeeded) * 100)}%`,
+                transition: "width 0.4s cubic-bezier(0.4, 0, 0.2, 1)"
+              }} />
+            )}
           </button>
 
           <button

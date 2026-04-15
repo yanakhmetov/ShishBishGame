@@ -64,6 +64,7 @@ interface GameState {
   missedTurns: Record<PlayerPosition, number>;
   kickedPlayers: PlayerPosition[];
   initialPlayerCount: number;
+  playerMoves: Record<PlayerPosition, number>;
 }
 
 interface GameContextType extends GameState {
@@ -77,6 +78,7 @@ interface GameContextType extends GameState {
   setRoomId: (id: string) => void;
   refreshRoomData: () => Promise<void>;
   turnTimer: number;
+  myPosition: PlayerPosition;
 }
 
 import {
@@ -140,6 +142,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children, playerCoun
     kickedPlayers: [],
     initialPlayerCount: playerCount,
     roomId: null,
+    playerMoves: { top: 0, bottom: 0, left: 0, right: 0 },
   });
 
   // Refs for socket handlers to avoid effect re-runs - Init with null first
@@ -206,6 +209,11 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children, playerCoun
           hydratedState.turnTimer = remaining;
         }
 
+        // Ensure playerMoves is present
+        if (!hydratedState.playerMoves) {
+          hydratedState.playerMoves = { top: 0, bottom: 0, left: 0, right: 0 };
+        }
+
         // Overwrite the local state entirely with the DB snapshot to restore the session
         return hydratedState;
       }
@@ -231,9 +239,9 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children, playerCoun
         return (p?.isReady || false) === prev.readyStatuses[pos];
       });
 
-      const isPlayersSame = room.players.length === prev.connectedPlayers.length && 
-                           room.players.every((p: any) => prev.connectedPlayers.some(cp => cp.userId === p.userId && cp.position === p.position));
-      
+      const isPlayersSame = room.players.length === prev.connectedPlayers.length &&
+        room.players.every((p: any) => prev.connectedPlayers.some(cp => cp.userId === p.userId && cp.position === p.position));
+
       // If nothing actually changed in Postgres, don't trigger a re-render
       // This prevents the "fighting" between socket and polling
       if (isReadinessSame && isPlayersSame) return prev;
@@ -267,8 +275,8 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children, playerCoun
         const isNewUserInSlot = prevInSlot && prevInSlot.userId !== p.userId;
 
         if (isNewUserInSlot) {
-            console.log(`[setRoomData] Slot ${pos} changed from ${prevInSlot.userId} to ${p.userId}. Resetting tokens.`);
-            newPlayers[pos].tokens = []; // Force reset below
+          console.log(`[setRoomData] Slot ${pos} changed from ${prevInSlot.userId} to ${p.userId}. Resetting tokens.`);
+          newPlayers[pos].tokens = []; // Force reset below
         }
 
         connected.push({
@@ -781,6 +789,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children, playerCoun
       );
 
       let nextPlayersMap = { ...prev.players, [playerPos]: { ...player, tokens: updatedTokens } };
+      const nextPlayerMoves = { ...prev.playerMoves, [playerPos]: (prev.playerMoves[playerPos] || 0) + 1 };
 
       const isSix = prev.diceValue === 6;
       const isFlight = effect === "flight";
@@ -832,6 +841,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children, playerCoun
         gameStatus: deservesExtraRoll ? "waiting" : "switching",
         // Reset missed turns for current player since they acted
         missedTurns: { ...prev.missedTurns, [playerPos]: 0 },
+        playerMoves: nextPlayerMoves,
         // If they deserve an extra roll, reset timer
         turnTimer: deservesExtraRoll ? 40 : prev.turnTimer,
         turnStartedAt: deservesExtraRoll ? Date.now() : prev.turnStartedAt
@@ -981,8 +991,11 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children, playerCoun
     }
   }, [gameState.readyStatuses, gameState.activePlayers, gameState.gameStarted, gameState.countdownStartedAt, gameState.countdown, gameState.playerCount]);
 
+  const me = gameState.connectedPlayers.find(p => p.userId === (session?.user as any)?.id);
+  const myPosition = me?.position || "top";
+
   return (
-    <GameContext.Provider value={{ ...gameState, rollDice, moveToken, resetGame, toggleReady, togglePause, surrender, setRoomData, setRoomId, refreshRoomData }}>
+    <GameContext.Provider value={{ ...gameState, rollDice, moveToken, resetGame, toggleReady, togglePause, surrender, setRoomData, setRoomId, refreshRoomData, myPosition }}>
       {children}
     </GameContext.Provider>
   );

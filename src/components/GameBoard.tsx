@@ -147,7 +147,7 @@ const AnimatedToken = ({
 
   return (
     <div
-      className={`game-token ${isMyTurn ? "active-token" : ""} ${canMove ? "movable-token" : ""} ${isAnimating ? "animating" : ""}`}
+      className={`game-token ${isMyTurn ? "active-token" : ""} ${canMove && !isAnimating ? "movable-token" : ""} ${isAnimating ? "animating" : ""}`}
       onClick={() => canMove && moveToken(token.id)}
       style={{
         position: "absolute",
@@ -155,7 +155,9 @@ const AnimatedToken = ({
         top: offsetPath ? undefined : `${currentPos.y}px`,
         offsetPath: offsetPath || undefined,
         offsetDistance: offsetPath ? (isAnimating ? "100%" : "0%") : undefined,
-        transform: offsetPath ? "none" : "translate(-50%, -50%)",
+        transform: isAnimating 
+          ? (offsetPath ? "none" : "translate(-50%, -50%)") 
+          : (canMove ? undefined : "translate(-50%, -50%)"),
         transition: isAnimating 
           ? `offset-distance ${animDuration}s cubic-bezier(0.4, 0, 0.2, 1)` 
           : "none",
@@ -174,7 +176,7 @@ const AnimatedToken = ({
 
 const GameBoard = ({ onProfileClick }: GameBoardProps) => {
   const { t } = useAppContext();
-  const { players, moveToken, currentTurn, activePlayers, connectedPlayers, diceValue, isRolling } = useGame();
+  const { players, moveToken, currentTurn, activePlayers, connectedPlayers, diceValue, isRolling, myPosition } = useGame();
 
   const size = 13;
   const center = 6;
@@ -451,7 +453,7 @@ const GameBoard = ({ onProfileClick }: GameBoardProps) => {
         const cp = connectedPlayers.find(p => p.position === pos);
         const homeTokenCount = players[pos].tokens.filter(t => t.isAtHome).length;
 
-        const cardElement = cp ? <PlayerCard position={pos} connectedPlayer={cp} color={color} onProfileClick={onProfileClick} /> : null;
+        const cardElement = cp ? <PlayerCard position={pos} connectedPlayer={cp} color={color} isMe={pos === myPosition} onProfileClick={onProfileClick} /> : null;
         const homeElement = <PlayerHome position={pos} color={color} count={homeTokenCount} />;
 
         return (

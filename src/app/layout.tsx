@@ -22,7 +22,6 @@ export default function RootLayout({
       <body className={inter.className}>
         <Providers>
           <AppProvider>
-            <ThemeLanguageToggle />
             {children}
           </AppProvider>
         </Providers>

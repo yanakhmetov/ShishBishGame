@@ -13,6 +13,7 @@ import { useSession } from "next-auth/react";
 import PlayerProfileModal from "@/components/PlayerProfileModal";
 import { ConnectedPlayer } from "@/context/GameContext";
 import { useAppContext } from "@/context/AppContext";
+import { ThemeLanguageToggle } from "@/components/ThemeLanguageToggle";
 
 function PlayPageContent() {
   const { t } = useAppContext();
@@ -28,7 +29,39 @@ function PlayPageContent() {
 
   const me = connectedPlayers.find(p => p.userId === (session?.user as any)?.id);
   const myPosition = me?.position;
-// ... (rest of component)
+
+  const [globalScale, setGlobalScale] = useState(1);
+
+  useEffect(() => {
+    const handleResize = () => {
+      // Dimensions of the entire layout container approx:
+      // Width: Dice(300) + gap(40) + Board(833) + gap(40) + Chat(320) = ~1533px
+      // Height: Header(~100) + Board(833) = ~933px
+      const targetWidth = 1600; 
+      const targetHeight = 950;
+      
+      const vw = window.innerWidth - 40;
+      const vh = window.innerHeight - 40;
+      
+      const widthScale = vw / targetWidth;
+      const heightScale = vh / targetHeight;
+      
+      // Use the smaller scale to ensure it fits in both dimensions
+      // But don't upscale beyond 1 to keep text sharp
+      const scale = Math.min(1, widthScale, heightScale);
+      setGlobalScale(scale);
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+// Sync with GameContext
+  useEffect(() => {
+    if (roomData) {
+      setRoomData(roomData);
+    }
+  }, [roomData, setRoomData]);
 
   const handleLeaveRoom = async () => {
     if (!roomId) return;
@@ -86,12 +119,6 @@ function PlayPageContent() {
     fetchRoomState(true);
   }, [roomId]);
 
-  // Sync with GameContext
-  useEffect(() => {
-    if (roomData) {
-      setRoomData(roomData);
-    }
-  }, [roomData, setRoomData]);
 
   if (joinError) {
     return (
@@ -130,9 +157,39 @@ function PlayPageContent() {
   const isBtnDisabled = isRolling || !gameStarted || currentTurn !== myPosition || diceValue > 0 || gameStatus === "switching";
 
   return (
-    <div className="container" style={{ padding: "1rem 2rem", minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-start" }}>
-      <InGameMenu />
-      <div style={{ textAlign: "center", marginBottom: "2rem", zIndex: 20 }}>
+    <div style={{ 
+      width: "100vw", 
+      height: "100vh", 
+      overflow: "hidden", 
+      position: "fixed",
+      top: 0,
+      left: 0,
+      background: "var(--background)",
+      zIndex: 100
+    }}>
+      <div 
+        className="game-arena-scaled" 
+        style={{ 
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          width: "1600px",
+          height: "950px",
+          display: "flex", 
+          flexDirection: "column", 
+          alignItems: "center", 
+          justifyContent: "flex-start",
+          transform: `translate(-50%, -50%) scale(${globalScale})`,
+          transformOrigin: "center center",
+          transition: "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+          flexShrink: 0
+        }}
+      >
+        <div style={{ position: "absolute", top: "20px", right: "20px", zIndex: 1000 }}>
+          <ThemeLanguageToggle />
+        </div>
+        <InGameMenu />
+        <div style={{ textAlign: "center", marginBottom: "2rem", zIndex: 20 }}>
         <h1 className="glow-text" style={{ fontSize: "2.5rem", fontWeight: "900", textTransform: "uppercase", fontStyle: "italic", background: "linear-gradient(to right, #60a5fa, #a855f7)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", margin: 0 }}>
           {roomData?.name || "Shish-Bish Arena"}
         </h1>
@@ -306,6 +363,7 @@ function PlayPageContent() {
           onClose={() => setSelectedPlayer(null)} 
         />
       )}
+      </div>
     </div>
   );
 }

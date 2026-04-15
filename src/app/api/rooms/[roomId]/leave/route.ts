@@ -76,7 +76,6 @@ export async function POST(
         gameState.winner = gameState.activePlayers[0];
         gameState.gameStatus = "finished";
       } else if (gameState.currentTurn === pos) {
-        // ... (existing switch turn logic)
         const CLOCKWISE_ORDER = ["top", "right", "bottom", "left"];
         const currentIndex = CLOCKWISE_ORDER.indexOf(pos);
         let nextPos = pos;

@@ -8,6 +8,8 @@ import { SignOutButton } from "@/components/SignOutButton";
 import { useAppContext } from "@/context/AppContext";
 import GameRooms from "@/components/GameRooms";
 
+import { ThemeLanguageToggle } from "./ThemeLanguageToggle";
+
 interface DashboardContentProps {
   user: any;
 }
@@ -17,6 +19,24 @@ export const DashboardContent = ({ user }: DashboardContentProps) => {
   const router = useRouter();
   const [activeRoom, setActiveRoom] = useState(user.roomsJoined?.[0]?.room || null);
   const [isLeaving, setIsLeaving] = useState(false);
+  const [globalScale, setGlobalScale] = useState(1);
+
+  // Scaling logic
+  React.useEffect(() => {
+    const handleResize = () => {
+      const targetWidth = 1600; 
+      const targetHeight = 950;
+      const vw = window.innerWidth - 40;
+      const vh = window.innerHeight - 40;
+      const widthScale = vw / targetWidth;
+      const heightScale = vh / targetHeight;
+      const scale = Math.min(1, widthScale, heightScale);
+      setGlobalScale(scale);
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   // Sync active room status on mount (to handle browser "back" navigation)
   React.useEffect(() => {
@@ -63,140 +83,173 @@ export const DashboardContent = ({ user }: DashboardContentProps) => {
   ];
 
   return (
-    <div style={{ minHeight: "100vh", padding: "2rem", maxWidth: "1200px", margin: "0 auto" }}>
-      {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "3rem" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-          <div className="glass" style={{ width: "60px", height: "60px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", border: "2px solid var(--accent)", overflow: "hidden" }}>
-            {user.image ? (
-              <img src={user.image} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", transform: `scale(${user.avatarZoom ?? 1.0}) translate(${(user.avatarX ?? 50) - 50}%, ${(user.avatarY ?? 50) - 50}%)` }} />
-            ) : (
-              <UserIcon size={30} color="var(--accent)" />
-            )}
-          </div>
-          <div>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <h2 className="glow-text">{user.name}</h2>
-              <Link href="/profile" style={{ display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(255,255,255,0.05)", padding: "4px 10px", borderRadius: "20px", fontSize: "11px", textDecoration: "none", color: "var(--accent)", border: "1px solid rgba(255,255,255,0.1)", transition: "all 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.1)"} onMouseLeave={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.05)"}>
-                {t("settings")}
-              </Link>
-            </div>
-            <p style={{ opacity: 0.6, fontSize: "0.9rem" }}>{t("masterOfBoard")}</p>
-          </div>
-        </div>
-        <SignOutButton />
-      </div>
-
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "2rem" }}>
-        {/* Stats Section */}
-        <div className="glass" style={{ padding: "2rem" }}>
-          <h3 style={{ marginBottom: "1.5rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            <Trophy size={20} /> {t("statistics")}
-          </h3>
-          <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-            {stats.map((s) => (
-              <div key={s.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "rgba(255,255,255,0.03)", padding: "1rem", borderRadius: "10px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                  {s.icon}
-                  <span>{s.label}</span>
-                </div>
-                <span style={{ fontWeight: "700", fontSize: "1.2rem" }}>{s.value}</span>
+    <div style={{ 
+      width: "100vw", 
+      height: "100vh", 
+      overflow: "hidden", 
+      position: "fixed",
+      top: 0,
+      left: 0,
+      background: "var(--background)",
+      zIndex: 100
+    }}>
+      <div 
+        style={{ 
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          width: "1600px",
+          height: "950px",
+          overflowY: "auto",
+          display: "flex", 
+          flexDirection: "column", 
+          alignItems: "center", 
+          justifyContent: "flex-start",
+          transform: `translate(-50%, -50%) scale(${globalScale})`,
+          transformOrigin: "center center",
+          transition: "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+          flexShrink: 0,
+          padding: "2rem"
+        }}
+        className="no-scrollbar"
+      >
+        <ThemeLanguageToggle />
+        <div style={{ width: "100%", maxWidth: "1200px", margin: "0 auto" }}>
+          {/* Header */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "3rem" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+              <div className="glass" style={{ width: "60px", height: "60px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", border: "2px solid var(--accent)", overflow: "hidden" }}>
+                {user.image ? (
+                  <img src={user.image} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", transform: `scale(${user.avatarZoom ?? 1.0}) translate(${(user.avatarX ?? 50) - 50}%, ${(user.avatarY ?? 50) - 50}%)` }} />
+                ) : (
+                  <UserIcon size={30} color="var(--accent)" />
+                )}
               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Achievements Section */}
-        <div className="glass" style={{ padding: "2rem" }}>
-          <h3 style={{ marginBottom: "1.5rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            <Medal size={20} /> {t("achievements")}
-          </h3>
-          
-          <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-            {[
-              { id: "centurion", title: t("centurionTitle"), desc: t("centurionDesc"), current: user.gamesPlayed || 0, target: 100, icon: <Users size={24} /> },
-              { id: "victor", title: t("victorTitle"), desc: t("victorDesc"), current: user.wins || 0, target: 10, icon: <Trophy size={24} /> },
-              { id: "veteran", title: t("veteranTitle"), desc: t("veteranDesc"), current: user.gamesPlayed || 0, target: 10, icon: <Medal size={24} /> },
-            ].map((ach) => {
-              const progress = Math.min(100, (ach.current / ach.target) * 100);
-              const isEarned = ach.current >= ach.target;
-              
-              return (
-                <div key={ach.id} style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-                  <div className="glass" style={{ 
-                    width: "50px", 
-                    height: "50px", 
-                    borderRadius: "12px", 
-                    display: "flex", 
-                    alignItems: "center", 
-                    justifyContent: "center",
-                    flexShrink: 0,
-                    filter: isEarned ? "none" : "grayscale(1) opacity(0.5)",
-                    background: isEarned ? "rgba(96, 165, 250, 0.1)" : "rgba(255,255,255,0.02)",
-                    border: `1px solid ${isEarned ? "var(--accent)" : "rgba(255,255,255,0.05)"}`,
-                    color: isEarned ? "var(--accent)" : "white",
-                    transition: "all 0.4s ease"
-                  }}>
-                    {ach.icon}
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
-                       <span style={{ fontSize: "14px", fontWeight: "700", opacity: isEarned ? 1 : 0.7 }}>{ach.title}</span>
-                       <span style={{ fontSize: "11px", opacity: 0.5 }}>{ach.current} / {ach.target}</span>
-                    </div>
-                    <div style={{ height: "6px", background: "rgba(255,255,255,0.05)", borderRadius: "3px", overflow: "hidden" }}>
-                       <div style={{ 
-                         width: `${progress}%`, 
-                         height: "100%", 
-                         background: isEarned ? "var(--accent)" : "linear-gradient(90deg, #60a5fa33, #60a5fa)", 
-                         boxShadow: isEarned ? "0 0 10px var(--accent)" : "none",
-                         transition: "width 1s ease-out" 
-                       }} />
-                    </div>
-                    <div style={{ fontSize: "10px", opacity: 0.4, marginTop: "4px" }}>{ach.desc}</div>
-                  </div>
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <h2 className="glow-text">{user.name}</h2>
+                  <Link href="/profile" style={{ display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(255,255,255,0.05)", padding: "4px 10px", borderRadius: "20px", fontSize: "11px", textDecoration: "none", color: "var(--accent)", border: "1px solid rgba(255,255,255,0.1)", transition: "all 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.1)"} onMouseLeave={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.05)"}>
+                    {t("settings")}
+                  </Link>
                 </div>
-              );
-            })}
+                <p style={{ opacity: 0.6, fontSize: "0.9rem" }}>{t("masterOfBoard")}</p>
+              </div>
+            </div>
+            <SignOutButton />
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "2rem" }}>
+            {/* Stats Section */}
+            <div className="glass" style={{ padding: "2rem" }}>
+              <h3 style={{ marginBottom: "1.5rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <Trophy size={20} /> {t("statistics")}
+              </h3>
+              <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                {stats.map((s) => (
+                  <div key={s.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "rgba(255,255,255,0.03)", padding: "1rem", borderRadius: "10px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                      {s.icon}
+                      <span>{s.label}</span>
+                    </div>
+                    <span style={{ fontWeight: "700", fontSize: "1.2rem" }}>{s.value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Achievements Section */}
+            <div className="glass" style={{ padding: "2rem" }}>
+              <h3 style={{ marginBottom: "1.5rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <Medal size={20} /> {t("achievements")}
+              </h3>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+                {[
+                  { id: "centurion", title: t("centurionTitle"), desc: t("centurionDesc"), current: user.gamesPlayed || 0, target: 100, icon: <Users size={24} /> },
+                  { id: "victor", title: t("victorTitle"), desc: t("victorDesc"), current: user.wins || 0, target: 10, icon: <Trophy size={24} /> },
+                  { id: "veteran", title: t("veteranTitle"), desc: t("veteranDesc"), current: user.gamesPlayed || 0, target: 10, icon: <Medal size={24} /> },
+                ].map((ach) => {
+                  const progress = Math.min(100, (ach.current / ach.target) * 100);
+                  const isEarned = ach.current >= ach.target;
+
+                  return (
+                    <div key={ach.id} style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+                      <div className="glass" style={{
+                        width: "50px",
+                        height: "50px",
+                        borderRadius: "12px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexShrink: 0,
+                        filter: isEarned ? "none" : "grayscale(1) opacity(0.5)",
+                        background: isEarned ? "rgba(96, 165, 250, 0.1)" : "rgba(255,255,255,0.02)",
+                        border: `1px solid ${isEarned ? "var(--accent)" : "rgba(255,255,255,0.05)"}`,
+                        color: isEarned ? "var(--accent)" : "white",
+                        transition: "all 0.4s ease"
+                      }}>
+                        {ach.icon}
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
+                          <span style={{ fontSize: "14px", fontWeight: "700", opacity: isEarned ? 1 : 0.7 }}>{ach.title}</span>
+                          <span style={{ fontSize: "11px", opacity: 0.5 }}>{ach.current} / {ach.target}</span>
+                        </div>
+                        <div style={{ height: "6px", background: "rgba(255,255,255,0.05)", borderRadius: "3px", overflow: "hidden" }}>
+                          <div style={{
+                            width: `${progress}%`,
+                            height: "100%",
+                            background: isEarned ? "var(--accent)" : "linear-gradient(90deg, #60a5fa33, #60a5fa)",
+                            boxShadow: isEarned ? "0 0 10px var(--accent)" : "none",
+                            transition: "width 1s ease-out"
+                          }} />
+                        </div>
+                        <div style={{ fontSize: "10px", opacity: 0.4, marginTop: "4px" }}>{ach.desc}</div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* Game Rooms Section OR Active Session */}
+          {activeRoom ? (
+            <div className="glass" style={{ marginTop: "2rem", padding: "3rem", textAlign: "center", border: "1px solid var(--accent)", boxShadow: "0 0 30px rgba(96, 165, 250, 0.1)" }}>
+              <div style={{ width: "70px", height: "70px", borderRadius: "50%", background: "rgba(96, 165, 250, 0.1)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.5rem" }}>
+                <Swords size={36} color="var(--accent)" />
+              </div>
+              <h3 style={{ fontSize: "1.5rem", fontWeight: "800", marginBottom: "0.5rem" }}>{t("activeBattle")}</h3>
+              <p style={{ opacity: 0.6, marginBottom: "2rem" }}>{t("alreadyInArena")} <strong>{activeRoom.name}</strong>. {t("completeOrLeave")}</p>
+
+              <div style={{ display: "flex", gap: "1rem", justifyContent: "center", maxWidth: "500px", margin: "0 auto" }}>
+                <button
+                  onClick={handleLeaveRoom}
+                  disabled={isLeaving}
+                  className="btn-secondary"
+                  style={{ flex: 1, margin: 0, height: "48px", border: "1px solid rgba(255,255,255,0.1)" }}
+                >
+                  {isLeaving ? t("leaving") : t("leaveArena")}
+                </button>
+                <Link href={`/play?roomId=${activeRoom.id}`} style={{ flex: 1 }}>
+                  <button
+                    className="btn-primary"
+                    style={{ width: "100%", margin: 0, height: "48px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}
+                  >
+                    <Play size={18} fill="black" /> {t("rejoinGame")}
+                  </button>
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <GameRooms user={user} />
+          )}
+
+          {/* Quick Start (Optional footer) */}
+          <div style={{ marginTop: "3rem", padding: "1rem", textAlign: "center", opacity: 0.5, fontSize: "12px" }}>
+            {t("dashboardFooter") || "Select a room to start playing Shish-Bish Arena"}
           </div>
         </div>
-      </div>
-
-      {/* Game Rooms Section OR Active Session */}
-      {activeRoom ? (
-        <div className="glass" style={{ marginTop: "2rem", padding: "3rem", textAlign: "center", border: "1px solid var(--accent)", boxShadow: "0 0 30px rgba(96, 165, 250, 0.1)" }}>
-          <div style={{ width: "70px", height: "70px", borderRadius: "50%", background: "rgba(96, 165, 250, 0.1)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.5rem" }}>
-             <Swords size={36} color="var(--accent)" />
-          </div>
-          <h3 style={{ fontSize: "1.5rem", fontWeight: "800", marginBottom: "0.5rem" }}>{t("activeBattle")}</h3>
-          <p style={{ opacity: 0.6, marginBottom: "2rem" }}>{t("alreadyInArena")} <strong>{activeRoom.name}</strong>. {t("completeOrLeave")}</p>
-          
-          <div style={{ display: "flex", gap: "1rem", justifyContent: "center", maxWidth: "500px", margin: "0 auto" }}>
-            <button 
-              onClick={handleLeaveRoom}
-              disabled={isLeaving}
-              className="btn-secondary" 
-              style={{ flex: 1, margin: 0, height: "48px", border: "1px solid rgba(255,255,255,0.1)" }}
-            >
-              {isLeaving ? t("leaving") : t("leaveArena")}
-            </button>
-            <Link href={`/play?roomId=${activeRoom.id}`} style={{ flex: 1 }}>
-              <button 
-                className="btn-primary" 
-                style={{ width: "100%", margin: 0, height: "48px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}
-              >
-                <Play size={18} fill="black" /> {t("rejoinGame")}
-              </button>
-            </Link>
-          </div>
-        </div>
-      ) : (
-        <GameRooms user={user} />
-      )}
-
-      {/* Quick Start (Optional footer) */}
-      <div style={{ marginTop: "3rem", padding: "1rem", textAlign: "center", opacity: 0.5, fontSize: "12px" }}>
-        {t("dashboardFooter") || "Select a room to start playing Shish-Bish Arena"}
       </div>
     </div>
   );

@@ -85,7 +85,7 @@ const PlayerHome: React.FC<PlayerHomeProps> = ({ position, color, count = 3 }) =
                     : tokenStyle.boxShadow,
                   cursor: canMove ? "pointer" : "default"
                 }} 
-                className={`game-token-home ${canMove ? "active-token" : ""}`}
+                className={`game-token-home ${canMove ? "movable-home-token" : ""}`}
                 onClick={() => canMove && moveToken(targetToken.id)}
               >
                 <div style={{

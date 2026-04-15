@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { UserPlus, Mail, Lock, User as UserIcon, Loader2 } from "lucide-react";
 import { useAppContext } from "@/context/AppContext";
+import { ThemeLanguageToggle } from "@/components/ThemeLanguageToggle";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -43,7 +44,9 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="container">
+    <>
+      <ThemeLanguageToggle />
+      <div className="container">
       <div className="glass card">
         <h1 className="glow-text">{t("createAccount")}</h1>
         <p style={{ color: "rgba(255,255,255,0.6)", marginBottom: "2rem" }}>
@@ -116,5 +119,6 @@ export default function RegisterPage() {
         }
       `}</style>
     </div>
+    </>
   );
 }

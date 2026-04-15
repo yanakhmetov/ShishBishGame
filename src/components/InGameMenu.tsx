@@ -47,7 +47,7 @@ const InGameMenu = () => {
   };
 
   return (
-    <div style={{ position: "fixed", top: "20px", right: "140px", zIndex: 2000 }}>
+    <div style={{ position: "fixed", top: "20px", right: "190px", zIndex: 2000 }}>
 
 
       <button

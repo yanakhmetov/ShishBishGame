@@ -134,7 +134,8 @@ export const ProfileContent = ({ user }: ProfileContentProps) => {
           transformOrigin: "center center",
           transition: "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
           flexShrink: 0,
-          padding: "2rem"
+          padding: "2rem",
+          overflowX: "hidden"
         }}
       >
         <ThemeLanguageToggle />
@@ -146,6 +147,7 @@ export const ProfileContent = ({ user }: ProfileContentProps) => {
             borderRadius: "32px", 
             position: "relative", 
             overflowY: "auto", 
+            overflowX: "hidden",
             width: "100%", 
             maxWidth: "800px",
             maxHeight: "90%",

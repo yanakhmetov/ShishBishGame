@@ -12,6 +12,24 @@ const PlayerProfileModal: React.FC<PlayerProfileModalProps> = ({ player, onClose
   const { t } = useAppContext();
   const [isZoomed, setIsZoomed] = useState(false);
   const [scale, setScale] = useState(1);
+  const [globalScale, setGlobalScale] = useState(1);
+
+  React.useEffect(() => {
+    // Scaling logic matching dashboard/create modal
+    const handleResize = () => {
+      const targetWidth = 1600; 
+      const targetHeight = 950;
+      const vw = window.innerWidth - 40;
+      const vh = window.innerHeight - 40;
+      const widthScale = vw / targetWidth;
+      const heightScale = vh / targetHeight;
+      const scaleValue = Math.min(1, widthScale, heightScale);
+      setGlobalScale(scaleValue);
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
   
   const stats = [
     { label: t("currentRating"), value: player.rating, icon: <Trophy size={20} color="var(--accent)" /> },
@@ -35,17 +53,32 @@ const PlayerProfileModal: React.FC<PlayerProfileModalProps> = ({ player, onClose
         alignItems: "center",
         justifyContent: "center",
         zIndex: 10000,
-        padding: "20px"
+        padding: "20px",
+        overflow: "hidden"
       }}>
-        <div className="glass" style={{
-          width: "100%",
-          maxWidth: "450px",
-          padding: "3rem",
-          position: "relative",
-          borderRadius: "32px",
-          animation: "modalPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards",
-          border: "1px solid rgba(255,255,255,0.1)"
+        {/* Scaler Wrapper */}
+        <div style={{
+          width: "1600px",
+          height: "950px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          transform: `scale(${globalScale})`,
+          transformOrigin: "center center",
+          pointerEvents: "none",
+          flexShrink: 0
         }}>
+          <div className="glass" style={{
+            width: "100%",
+            maxWidth: "450px",
+            padding: "3rem",
+            position: "relative",
+            borderRadius: "32px",
+            animation: "modalPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards",
+            border: "1px solid rgba(255,255,255,0.1)",
+            pointerEvents: "auto",
+            margin: "20px"
+          }}>
           {/* Close Button */}
           <button 
             onClick={onClose}
@@ -160,6 +193,7 @@ const PlayerProfileModal: React.FC<PlayerProfileModalProps> = ({ player, onClose
           )}
         </div>
       </div>
+    </div>
 
       {/* Zoom Overlay */}
       {isZoomed && player.image && (

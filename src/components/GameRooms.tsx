@@ -17,6 +17,25 @@ const GameRooms = ({ user }: { user: any }) => {
   const [isJoining, setIsJoining] = useState(false);
   const [joinError, setJoinError] = useState("");
 
+  const [globalScale, setGlobalScale] = useState(1);
+  
+  useEffect(() => {
+    // Scaling logic matching dashboard/create modal
+    const handleResize = () => {
+      const targetWidth = 1600; 
+      const targetHeight = 950;
+      const vw = window.innerWidth - 40;
+      const vh = window.innerHeight - 40;
+      const widthScale = vw / targetWidth;
+      const heightScale = vh / targetHeight;
+      const scale = Math.min(1, widthScale, heightScale);
+      setGlobalScale(scale);
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const fetchRooms = async (search?: string) => {
     try {
       if (search === undefined) setIsLoading(true);
@@ -166,7 +185,7 @@ const GameRooms = ({ user }: { user: any }) => {
                       </span>
                     </h4>
                     <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "11px", opacity: 0.6 }}>
-                      {room.type === "private" ? <Lock size={12} /> : <Globe size={12} />}
+                       {room.type === "private" ? <Lock size={12} /> : <Globe size={12} />}
                       <span>{room.type.toUpperCase()}</span>
                       <span>•</span>
                       <span>🏆 {room.minRating}+</span>
@@ -249,52 +268,67 @@ const GameRooms = ({ user }: { user: any }) => {
           alignItems: "center",
           justifyContent: "center",
           zIndex: 10000,
-          padding: "20px"
+          padding: "20px",
+          overflow: "hidden"
         }}>
-          <div className="glass" style={{
-            width: "100%",
-            maxWidth: "400px",
-            padding: "2.5rem",
-            position: "relative",
-            animation: "modalPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards"
+          <div style={{
+            width: "1600px",
+            height: "950px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            transform: `scale(${globalScale})`,
+            transformOrigin: "center center",
+            pointerEvents: "none",
+            flexShrink: 0
           }}>
-            <button 
-              onClick={() => setPasswordRoom(null)}
-              style={{ position: "absolute", top: "20px", right: "20px", background: "none", border: "none", color: "white", cursor: "pointer", opacity: 0.5 }}
-            >
-              <X size={24} />
-            </button>
-
-            <h2 className="glow-text" style={{ fontSize: "1.5rem", marginBottom: "1rem", textAlign: "center" }}>
-              {t("privateArena")}
-            </h2>
-            <p style={{ textAlign: "center", fontSize: "14px", opacity: 0.6, marginBottom: "2rem" }}>
-              {t("enterPasswordForRoom") || t("enterPasswordFor")} <strong>{passwordRoom.name}</strong>
-            </p>
-
-            <form onSubmit={handlePasswordSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                <input 
-                  type="password" 
-                  autoFocus
-                  placeholder={t("password")}
-                  value={enteredPassword}
-                  onChange={(e) => setEnteredPassword(e.target.value)}
-                  className="glass"
-                  style={{ padding: "0.8rem 1rem", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", color: "white", textAlign: "center", fontSize: "18px", letterSpacing: "4px" }}
-                />
-                {joinError && <div style={{ color: "#f87171", fontSize: "12px", textAlign: "center", marginTop: "4px" }}>{joinError}</div>}
-              </div>
-
+            <div className="glass" style={{
+              width: "100%",
+              maxWidth: "400px",
+              padding: "2.5rem",
+              position: "relative",
+              animation: "modalPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards",
+              pointerEvents: "auto",
+              margin: "20px"
+            }}>
               <button 
-                type="submit" 
-                className="btn-primary" 
-                disabled={isJoining}
-                style={{ height: "48px", fontSize: "16px" }}
+                onClick={() => setPasswordRoom(null)}
+                style={{ position: "absolute", top: "20px", right: "20px", background: "none", border: "none", color: "white", cursor: "pointer", opacity: 0.5 }}
               >
-                {isJoining ? t("joining") : t("confirmJoin")}
+                <X size={24} />
               </button>
-            </form>
+
+              <h2 className="glow-text" style={{ fontSize: "1.5rem", marginBottom: "1rem", textAlign: "center" }}>
+                {t("privateArena")}
+              </h2>
+              <p style={{ textAlign: "center", fontSize: "14px", opacity: 0.6, marginBottom: "2rem" }}>
+                {t("enterPasswordForRoom") || t("enterPasswordFor")} <strong>{passwordRoom.name}</strong>
+              </p>
+
+              <form onSubmit={handlePasswordSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                  <input 
+                    type="password" 
+                    autoFocus
+                    placeholder={t("password")}
+                    value={enteredPassword}
+                    onChange={(e) => setEnteredPassword(e.target.value)}
+                    className="glass"
+                    style={{ padding: "0.8rem 1rem", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", color: "white", textAlign: "center", fontSize: "18px", letterSpacing: "4px" }}
+                  />
+                  {joinError && <div style={{ color: "#f87171", fontSize: "12px", textAlign: "center", marginTop: "4px" }}>{joinError}</div>}
+                </div>
+
+                <button 
+                  type="submit" 
+                  className="btn-primary" 
+                  disabled={isJoining}
+                  style={{ height: "48px", fontSize: "16px" }}
+                >
+                  {isJoining ? t("joining") : t("confirmJoin")}
+                </button>
+              </form>
+            </div>
           </div>
         </div>
       )}

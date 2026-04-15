@@ -109,6 +109,16 @@ export const ProfileContent = ({ user }: ProfileContentProps) => {
       background: "var(--background)",
       zIndex: 100
     }}>
+      {/* Background Dim Backdrop */}
+      <div style={{
+        position: "absolute",
+        top: 0, left: 0, right: 0, bottom: 0,
+        background: "rgba(0, 0, 0, 0.4)",
+        backdropFilter: "blur(20px)",
+        pointerEvents: "none"
+      }} />
+
+      {/* Main Scaled Block */}
       <div 
         style={{ 
           position: "absolute",
@@ -116,21 +126,33 @@ export const ProfileContent = ({ user }: ProfileContentProps) => {
           left: "50%",
           width: "1600px",
           height: "950px",
-          overflowY: "auto",
           display: "flex", 
           flexDirection: "column", 
           alignItems: "center", 
-          justifyContent: "flex-start",
+          justifyContent: "center",
           transform: `translate(-50%, -50%) scale(${globalScale})`,
           transformOrigin: "center center",
           transition: "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
           flexShrink: 0,
           padding: "2rem"
         }}
-        className="no-scrollbar"
       >
         <ThemeLanguageToggle />
-        <div className="glass" style={{ padding: "3rem", borderRadius: "32px", position: "relative", overflow: "hidden", width: "100%", maxWidth: "800px" }}>
+        
+        <div 
+          className="glass no-scrollbar" 
+          style={{ 
+            padding: "3rem", 
+            borderRadius: "32px", 
+            position: "relative", 
+            overflowY: "auto", 
+            width: "100%", 
+            maxWidth: "800px",
+            maxHeight: "90%",
+            background: "rgba(15, 15, 15, 0.8)",
+            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)"
+          }}
+        >
           {/* Background Glow */}
           <div style={{ position: "absolute", top: "-100px", right: "-100px", width: "300px", height: "300px", background: "var(--accent)", borderRadius: "50%", filter: "blur(120px)", opacity: 0.1, pointerEvents: "none" }} />
 
@@ -159,7 +181,7 @@ export const ProfileContent = ({ user }: ProfileContentProps) => {
             <X size={20} />
           </button>
 
-          <h1 className="glow-text" style={{ fontSize: "2.5rem", marginBottom: "3rem" }}>{t("personalCabinet")}</h1>
+          <h1 className="glow-text" style={{ fontSize: "2.5rem", marginBottom: "3rem", textAlign: "center" }}>{t("personalCabinet")}</h1>
 
           <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "2.5rem" }}>
             {/* Avatar Preview */}

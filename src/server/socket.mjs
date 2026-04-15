@@ -4,17 +4,24 @@ import { Server } from "socket.io";
 const httpServer = createServer();
 const io = new Server(httpServer, {
   cors: {
-    origin: "*", // Разрешаем подключения ототовсюду для теста
-    methods: ["GET", "POST"]
-  }
+    origin: true, // Allow all origins but echo them back (better for credentials: true)
+    methods: ["GET", "POST"],
+    credentials: true
+  },
+  pingTimeout: 60000,
+  pingInterval: 25000
 });
 
 io.on("connection", (socket) => {
-  console.log("Real-time client connected:", socket.id);
+  console.log(`[Socket] New connection: ${socket.id} (Total: ${io.engine.clientsCount})`);
 
   socket.on("join-room", (roomId) => {
+    if (!roomId) return;
     socket.join(roomId);
-    console.log(`User joined room: ${roomId}`);
+    console.log(`[Socket] User ${socket.id} joined room: ${roomId}`);
+    
+    // Optional: notify others in the room
+    socket.to(roomId).emit("player-joined", { id: socket.id });
   });
 
   socket.on("game-action", (data) => {

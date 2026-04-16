@@ -1,36 +1,136 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🎲 Shish-Bish — Premium Multiplayer Board Game
 
-## Getting Started
+![Shish-Bish Banner](./public/readme-banner.png)
 
-First, run the development server:
+<div align="center">
 
+[![Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19-blue?style=for-the-badge&logo=react)](https://reactjs.org/)
+[![Socket.io](https://img.shields.io/badge/Socket.io-Real--Time-010101?style=for-the-badge&logo=socket.io)](https://socket.io/)
+[![Prisma](https://img.shields.io/badge/Prisma-ORM-2D3748?style=for-the-badge&logo=prisma)](https://www.prisma.io/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-DB-336791?style=for-the-badge&logo=postgresql)](https://www.postgresql.org/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker)](https://www.docker.com/)
+
+---
+
+**Shish-Bish** — это многопользовательская настольная игра в реальном времени, вдохновленная классическими правилами и облаченная в современный "Glassmorphism" дизайн. Проект сочетает в себе высокую производительность Next.js 15 и мгновенный отклик благодаря Socket.io.
+
+[Возможности](#✨-возможности) • [Установка](#🚀-быстрый-старт) • [Стек](#🛠-технологический-стек) • [Docker](#🐳-запуск-через-docker)
+
+</div>
+
+---
+
+## ✨ Возможности
+
+- 🎮 **Real-time Multiplayer**: Мгновенная синхронизация игрового процесса между игроками через **Socket.io**.
+- 🎲 **3D Dice Engine**: Реалистичные 3D кости с физикой и плавными анимациями броска.
+- 💎 **Premium Glass Design**: Элегантный интерфейс с эффектами матового стекла, золотыми акцентами и динамическим освещением.
+- 🏠 **Система Комнат**: Создание игровых арен, лобби ожидания и управление списком активных комнат.
+- 💬 **Внутриигровой Чат**: Общайтесь с соперниками прямо во время партии.
+- 👤 **Профили и Кастомизация**: Персонализация игрока, отслеживание статистики и смена настроек.
+- 🌍 **Internationalization (i18n)**: Полная поддержка нескольких языков (Русский/English) и переключение тем оформления.
+- 🐳 **Full Stack Docker**: Готовая инфраструктура для быстрого развертывания всего стека (App + DB + Socket Server).
+
+---
+
+## 🛠 Технологический стек
+
+### Frontend & Core
+- **Framework**: [Next.js 15 (App Router)](https://nextjs.org/)
+- **Library**: [React 19](https://react.dev/)
+- **Styling**: Vanilla CSS (Premium Glass Design System)
+- **Icons**: [Lucide React](https://lucide.dev/)
+- **Real-time**: [Socket.io-client](https://socket.io/)
+
+### Backend & Infrastructure
+- **Server**: Node.js & Socket.io Server
+- **ORM**: [Prisma](https://www.prisma.io/)
+- **Database**: PostgreSQL
+- **Auth**: [NextAuth.js](https://next-auth.js.org/)
+- **Validation**: Zod (implied)
+- **Security**: bcryptjs
+
+---
+
+## 🚀 Быстрый старт
+
+### 1. Клонирование и установка
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/your-username/shish-bish.git
+cd shish-bish
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Настройка окружения
+Создайте файл `.env` на основе примера:
+```bash
+cp .env.example .env
+```
+Укажите параметры подключения к БД (`DATABASE_URL`), секреты для Auth и URL сокет-сервера.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Инициализация базы данных
+```bash
+# Генерация Prisma Client
+npx prisma generate
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# Применение схемы к БД
+npx prisma db push
 
-## Learn More
+# (Опционально) Заполнение тестовыми данными
+npm run db:seed
+```
 
-To learn more about Next.js, take a look at the following resources:
+### 4. Запуск в режиме разработки
+```bash
+npm run dev
+```
+Откройте [http://localhost:3000](http://localhost:3000).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🐳 Запуск через Docker
 
-## Deploy on Vercel
+Самый простой способ запустить весь проект с базой данных:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+# Сборка и запуск контейнеров
+docker-compose up -d --build
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**Доступные сервисы:**
+- **Web App**: `http://localhost:3000`
+- **Socket Server**: `:3001` (или настроенный порт)
+- **PostgreSQL**: `:5432`
+- **Prisma Studio**: `npx prisma studio`
+
+---
+
+## 📂 Структура проекта
+
+```text
+shish-bish/
+├── prisma/             # Схемы БД и сиды
+├── public/             # Статические ассеты (иконки, баннеры)
+├── src/
+│   ├── app/            # Next.js App Router (UI & Logic)
+│   ├── components/     # React компоненты (Board, Dice, Chat)
+│   ├── context/        # Управление глобальным состоянием
+│   ├── lib/            # Утилиты и конфигурации (Prisma, Socket)
+│   ├── server/         # Логика Socket.io сервера
+│   └── types/          # TypeScript определения
+├── Dockerfile          # Сборка веб-приложения
+├── Dockerfile.socket   # Сборка сокет-сервера
+└── docker-compose.yml  # Оркестрация всей инфраструктуры
+```
+
+---
+
+## 📄 Лицензия
+
+Этот проект распространяется под лицензией MIT.
+
+---
+<div align="center">
+⭐ Если вам понравилась игра, будем благодарны за звезду на GitHub!
+</div>
